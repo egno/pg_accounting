@@ -305,6 +305,10 @@ begin
 			left join regop_individual_acc_own ia on ia.id=coalesce(old_value::bigint, a.acc_owner_id)
 			;
 
+/*
+-- детализация счёта по ЛС не имеет смысла, т.к. к оплате может быть выставлена сумма не равная сумме начислений по ЛС
+-- например, если раннее получилась пререплата в результате перерасчёта, то в этом месяце к оплате выставляется сумма с учётом этой переплаты.
+
 			if exists (select 'x' from regop_pers_paydoc_snap where snapshot_id=NEW.id) then
 				insert into acc.oper ( dt, sm , 
 					debet_descr, credit_descr,
@@ -354,6 +358,7 @@ begin
 				where ds.snapshot_id=NEW.id
 				and not coalesce(ds.penalty_sum,0) = 0;
 			else
+*/			
 				insert into acc.oper ( dt, sm , 
 					debet_descr, credit_descr,
 					table_name, entity_id,
@@ -368,7 +373,7 @@ begin
 				'Выставлен счёт на оплату'
 				from unnest(array[1])
 				returning id into _id;
-			end if;
+--			end if;
 
 		else
 			RAISE NOTICE 'Record %=% was skipped', TG_TABLE_NAME, NEW.id;
